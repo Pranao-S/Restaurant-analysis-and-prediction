@@ -1,0 +1,123 @@
+---
+generator: pandoc
+title: Visualisations_19BCE1740
+author: "19BCE1740_Pranao_Sahasrabuddhey"
+date: "03/12/2021"
+viewport: width=device-width, initial-scale=1
+---
+``` {r}
+library('knitr')
+library('dplyr')
+library('ggplot2')
+#library('DMwR')
+setwd("R:/Kaggle comp/datalab/Pranao_Saha1")
+data12 <- read.csv("zomato1.csv")
+```
+
+
+### What percent of restaurants are a part of chain?
+
+``` {r}
+chain= data12 %>%
+    group_by(Restaurant.ID)%>% 
+    count()%>% filter(n>1)
+print(nrow(chain)/nrow(data12)*100)
+```
+
+### Which are the biggest food chains on India?
+
+``` {r}
+big_chain= data12 %>%
+    group_by(Restaurant.ID,Restaurant.Name) %>% count()%>% filter(n>1)%>% arrange(n)
+b=tail(big_chain)
+ggplot(b,aes(x=Restaurant.Name))+geom_col(aes(y=n,fill=Restaurant.Name))
+```
+
+### What type of establishments have most no of outlets?
+
+``` {r}
+establishment= data12 %>% group_by(establishment) %>% count()%>% filter(n>1)%>% arrange(n)
+b=tail(establishment)
+ggplot(b,aes(x=establishment))+geom_col(aes(y=n,fill=establishment))
+```
+
+### Which city has most restaurants?
+
+``` {r}
+big_city = data12 %>%
+    group_by(City) %>% 
+    count()%>% 
+    filter(n>1)%>% arrange(n)
+b=tail(big_city)
+ggplot(b,aes(x=city))+geom_col(aes(y=n,fill=city))
+```
+
+### Which city's restaurants have the highest average rating?
+
+``` {r}
+city_rating= data12 %>% 
+    select(city,aggregate.rating)
+big_rating= aggregate(.~city, data=city_rating, mean)
+b=big_rating %>% 
+    arrange(aggregate_rating)
+b=tail(big_rating)
+ggplot(b,aes(x=city))+geom_col(aes(y=aggregate_rating,fill=city))
+```
+
+### Which is the most preferred cuisine?
+
+``` {r}
+cuisine_rating= data12 %>% 
+    select(cuisines,aggregate_rating)
+big_cuisines=aggregate(.~cuisines,data=cuisine.rating,mean)
+big_cuisines=big_cuisines %>% arrange(aggregate_rating)
+b=tail(big_cuisines)
+ggplot(b,aes(x=cuisines))+geom_col(aes(y=aggregate_rating,fill=cuisines))
+```
+
+``` {r}
+ggplot(rest,aes(x=city_id))+geom_point(aes(x=city_id,y=aggregate_rating))
+```
+
+``` {r}
+ggplot(rest,aes(x=city_id))+geom_smooth(aes(x=city_id,y=aggregate_rating))
+```
+
+### Above plots are just to see how the ratings generally are i.e. if ratings are evenly spread?
+
+``` {r}
+cor(rest$average_cost_for_two,rest$aggregate_rating)
+```
+
+``` {r}
+rest=rest %>% arrange(rest,aggregate_rating)
+sample=head(rest,1000)
+ggplot(sample)+geom_bar(aes(x=city))
+```
+
+``` {r}
+sample1=tail(rest,100)
+ggplot(sample1)+geom_bar(aes(x=city,fill=city))
+```
+
+### We can evidently see that the top 1000 restaurants are mainly based on the cities New Delhi and around New Delhi. And we can see that those restauarants with bad ratings the cities are spread around in various cities showing that there is a high possibility of either bias or possiblity of disparities in a large scale in the facilities provided by the restaurants in the region of delhi. Let us see f that is true.
+
+``` {r}
+sample2=rest %>% filter( city=="New Delhi" )
+ggplot(sample2,aes(x=res_id))+geom_boxplot(aes(x=res_id,y=aggregate_rating))
+```
+
+### We can see that there is no bias in the ratings, and we have restaurants in New Delhi with actually good customer ratings.
+
+``` {r}
+sample3=subset(rest, aggregate_rating>4)
+ggplot(sample3,aes(x=average_cost_for_two))+geom_point(aes(x=average_cost_for_two,y=aggregate_rating))
+```
+
+### It is vivid that the restaurants are higly dense in the range of 0-2000 rupees which either can be seen as an inference to the fact that most people like restaurants which are budget friendly inspite of the facilities and ambience which high end restaurants do provide.
+
+``` {r}
+ggplot(rest,aes(x=photo_count))+geom_point(aes(x=photo_count,y=aggregate_rating))
+```
+
+### Thus this suggests that photo count really doesn't matter in improving the rating of the restaurant and there are restaurants with all ratings for each photo_count. And also we have to remember that the photo_count is mostly not not more than 0-2500 range.
