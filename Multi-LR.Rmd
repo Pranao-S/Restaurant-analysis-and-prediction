@@ -1,0 +1,107 @@
+---
+title: "Multivariable Linear Regression"
+author: "19BCE1740-Pranao"
+date: "11/29/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, echo=FALSE}
+# Installing Packages
+# install.packages("e1071")
+# install.packages("caTools")
+# install.packages("caret")
+
+# Loading package
+suppressMessages(library(caTools))
+suppressMessages(library(tidyr))
+```
+
+```{r}
+zomato <- read.csv("zz.csv")
+country <- read.csv("Country-Code.csv")
+```
+
+
+```{r cars}
+str(zomato)
+str(country)
+
+summary(zomato)
+summary(country)
+
+head(zomato)
+```
+
+```{r}
+zomato$Cuisines <- as.numeric(zomato$Cuisines)
+```
+
+
+```{r}
+# Splitting data into train and test data
+split <- sample.split(zomato, SplitRatio = 0.75)
+train <- subset(zomato, split == "TRUE")
+test <- subset(zomato, split == "FALSE")
+```
+
+```{r}
+dim(train)
+dim(test)
+```
+
+```{r}
+test <- subset(test, select = -c(Restaurant.ID, Restaurant.Name, City, Address, Locality, Locality.Verbose, Longitude, Latitude, Currency, Rating.text))
+test_rate <- test$Aggregate.rating
+```
+
+```{r}
+m <- lm(Aggregate.rating ~ Country.Code + Price.range + Votes + Cuisines + Rating.color, data=test)
+summary(m)
+```
+
+```{r}
+test <- subset(test, select = -c(Aggregate.rating))
+Predicted.Rating <- predict(m, test)
+head(cbind(Predicted.Rating))
+```
+
+```{r}
+count = 0
+
+#sum(is.na(Predicted.Rating))
+#Predicted.Rating <- replace_na(Predicted.Rating, 0)
+#test_rate <- replace_na(test_rate, 0)
+
+for (i in 1:length(Predicted.Rating)) {
+  v1 <- round(Predicted.Rating[i], 1)
+  v2 <- test_rate[i]
+  if(is.na(v1)) {
+    v1 = 0
+  }
+  if((v1-v2 < 0.25) && (v2-v1 < 0.25)) {
+    count = count+1
+  }
+}
+per <- (count/length(Predicted.Rating))*100
+cat("Accuracy : ", round(per,2), "%")
+```
+
+```{r}
+model <- lm(zomato$Aggregate.rating~zomato$Rating.color)
+plot(model)
+summary(model)
+```
+
+```{r}
+library(corrplot)
+```
+```{r}
+corrmat <- cor(test)
+corrmat
+corrplot(corrmat)
+```
+
