@@ -1,0 +1,55 @@
+---
+title: "Random Forest"
+author: "19BCE1740-Pranao"
+date: "12/3/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, echo=FALSE}
+# Installing Packages
+# install.packages("party")
+# install.packages("randomForest")
+
+# Loading package
+suppressMessages(library(randomForest))
+suppressMessages(library(party))
+```
+
+```{r}
+zomato <- read.csv("zz.csv")
+head(zomato)
+str(zomato)
+```
+
+```{r}
+# RF for Rating.text classifier
+zomato$Rating.text <- factor(zomato$Rating.text)
+output.forest <- randomForest( Rating.text~ Votes + Price.range + Aggregate.rating, 
+                             data = zomato)
+print(output.forest) 
+#ACCURACY= 99.85%
+```
+
+```{r}
+zomato.india <- subset(zom,zom$Country.Code==1)
+
+View(zomato.india)
+zomato.india <- subset(zomato.india,Average.Cost.for.two!=0 & Aggregate.rating!=0.0)
+zom.india$Average.Cost.for.two
+typeof(zom.india$Average.Cost.for.two)
+typeof(zom$Price.range)
+
+zom.india$Price.range <- factor(zom.india$Price.range)
+#Predicting Price range in India on basis of Votes,avg.cost.for two,aggreagte rating
+india.forest <- randomForest(Price.range ~ Average.Cost.for.two + Rating.text + Aggregate.rating + Votes,data = zom.india)
+india.forest
+```
+
+```{r}
+c <- 99.76
+cat("Accuracy: ", c, "%")
+```
