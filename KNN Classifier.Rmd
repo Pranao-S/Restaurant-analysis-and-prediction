@@ -1,0 +1,51 @@
+---
+title: "KNN Classifier"
+author: "19BCE1740-Pranao"
+date: "12/3/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, echo=FALSE}
+# Loading packages
+suppressMessages(library(e1071))
+suppressMessages(library(caTools))
+suppressMessages(library(class))
+```
+
+```{r}
+# Loading the dataset
+zomato <- read.csv("zz.csv")
+```
+
+```{r}
+# Splitting data into training and testing data
+split <- sample.split(zomato, SplitRatio = 0.7)
+train_cl <- subset(zomato, split == "TRUE")
+test_cl <- subset(zomato, split == "FALSE")
+```
+
+```{r}
+train_scale <- scale(train_cl[,c("Country.Code","Price.range","Aggregate.rating","Votes")])
+test_scale <- scale(test_cl[,c("Country.Code","Price.range","Aggregate.rating","Votes")])
+```
+
+```{r}
+classifier_knn <- knn(train = train_scale, test = test_scale, cl = train_cl$Rating.text, k = 1)
+#classifier_knn
+```
+
+```{r}
+cm <- table(test_cl$Rating.text, classifier_knn)
+cm
+```
+
+```{r}
+misClassError <- mean(classifier_knn != test_cl$Rating.text)
+
+per <- round((1-misClassError)*100, 2)
+cat('Accuracy =', per, '%')
+```
